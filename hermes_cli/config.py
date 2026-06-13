@@ -1309,6 +1309,10 @@ DEFAULT_CONFIG = {
             "api_key": "",
             "timeout": 30,
             "extra_body": {},
+            # Pin session titles to a specific language (e.g. "English",
+            # "Japanese"). Empty = match the conversation's language.
+            # Inspired by Claude Code v2.1.176's `language` setting.
+            "language": "",
         },
         "tts_audio_tags": {
             "provider": "auto",

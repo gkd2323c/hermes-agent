@@ -22,8 +22,33 @@ TitleCallback = Callable[[str], None]
 _TITLE_PROMPT = (
     "Generate a short, descriptive title (3-7 words) for a conversation that starts with the "
     "following exchange. The title should capture the main topic or intent. "
+    "Write the title in the same language the user is writing in. "
     "Return ONLY the title text, nothing else. No quotes, no punctuation at the end, no prefixes."
 )
+
+# When the user pins a title language in config.yaml
+# (auxiliary.title_generation.language), this replaces the
+# match-the-conversation instruction. Inspired by Claude Code v2.1.176
+# (June 2026): "Session titles now generated in the conversation's
+# language (`language` setting pins a specific one)."
+_TITLE_PROMPT_PINNED = (
+    "Generate a short, descriptive title (3-7 words) for a conversation that starts with the "
+    "following exchange. The title should capture the main topic or intent. "
+    "Write the title in {language}, regardless of the conversation's language. "
+    "Return ONLY the title text, nothing else. No quotes, no punctuation at the end, no prefixes."
+)
+
+
+def _pinned_title_language() -> str:
+    """Return the configured title language, or '' to match the conversation."""
+    try:
+        from hermes_cli.config import load_config
+
+        aux = (load_config() or {}).get("auxiliary") or {}
+        task_cfg = aux.get("title_generation") or {}
+        return str(task_cfg.get("language") or "").strip()
+    except Exception:
+        return ""
 
 
 def generate_title(
@@ -48,8 +73,13 @@ def generate_title(
     user_snippet = user_message[:500] if user_message else ""
     assistant_snippet = assistant_response[:500] if assistant_response else ""
 
+    pinned = _pinned_title_language()
+    system_prompt = (
+        _TITLE_PROMPT_PINNED.format(language=pinned) if pinned else _TITLE_PROMPT
+    )
+
     messages = [
-        {"role": "system", "content": _TITLE_PROMPT},
+        {"role": "system", "content": system_prompt},
         {"role": "user", "content": f"User: {user_snippet}\n\nAssistant: {assistant_snippet}"},
     ]
 

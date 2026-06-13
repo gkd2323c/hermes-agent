@@ -938,6 +938,16 @@ auxiliary:
   compression:
     timeout: 120               # seconds — compression summarizes long conversations, needs more time
 
+  # Auto-generated session titles (first exchange of each session)
+  title_generation:
+    provider: "auto"
+    model: ""                  # cheap/fast model recommended (e.g. gemini-flash, haiku)
+    base_url: ""
+    api_key: ""
+    timeout: 30
+    language: ""               # pin titles to a language, e.g. "English" or "Japanese";
+                               # empty = title follows the conversation's language
+
   # Skills hub — skill matching and search
   skills_hub:
     provider: "auto"
